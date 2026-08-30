@@ -108,12 +108,12 @@ export default function VideoCallRoom({ appointment, onEnd }: { appointment: App
   const patientInitial = patient?.full_name?.charAt(0).toUpperCase() || 'P';
 
   return (
-    <div className="fixed inset-0 z-50 bg-gray-900 flex flex-col">
+    <div className="fixed inset-0 z-50 bg-gray-900 flex flex-col animate-fade-in">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3 bg-gray-800 shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-error-500 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-error-500 animate-pulse-glow" />
             <span className="text-white text-sm font-medium hidden sm:inline">{t(lang, 'videoConsultation')}</span>
           </div>
           <span className="text-gray-400 text-sm">·</span>

@@ -105,7 +105,7 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <div className="card p-6 sm:p-8">
+          <div className="card p-6 sm:p-8 animate-scale-in">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 {mode === 'signin' ? t(lang, 'signInToContinue') : t(lang, 'createAccount')}

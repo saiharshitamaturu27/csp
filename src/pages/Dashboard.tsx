@@ -45,15 +45,15 @@ export default function Dashboard() {
       <PageHeader title={`${t(lang, 'welcome')}, ${profile?.full_name?.split(' ')[0] || ''}`} subtitle={format(new Date(), 'EEEE, d MMMM yyyy')} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={Users} label={t(lang, 'totalPatients')} value={stats.patients} color="primary" />
-        <StatCard icon={CalendarDays} label={t(lang, 'todaysAppointments')} value={stats.apptsToday} color="secondary" />
-        <StatCard icon={Activity} label={t(lang, 'pendingFollowups')} value={stats.followups} color="accent" />
-        <StatCard icon={AlertTriangle} label={t(lang, 'lowStock')} value={stats.lowStock} color="warning" />
+        <div className="animate-fade-in-up"><StatCard icon={Users} label={t(lang, 'totalPatients')} value={stats.patients} color="primary" /></div>
+        <div className="animate-fade-in-up delay-75"><StatCard icon={CalendarDays} label={t(lang, 'todaysAppointments')} value={stats.apptsToday} color="secondary" /></div>
+        <div className="animate-fade-in-up delay-150"><StatCard icon={Activity} label={t(lang, 'pendingFollowups')} value={stats.followups} color="accent" /></div>
+        <div className="animate-fade-in-up delay-200"><StatCard icon={AlertTriangle} label={t(lang, 'lowStock')} value={stats.lowStock} color="warning" /></div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upcoming appointments */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="card card-hover p-5 lg:col-span-2 animate-fade-in-up delay-300">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900">{t(lang, 'upcomingAppointments')}</h2>
             <Link to="/appointments" className="text-sm text-primary-600 hover:underline">{t(lang, 'viewAll')}</Link>
@@ -81,7 +81,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stock alerts */}
-        <div className="card p-5">
+        <div className="card card-hover p-5 animate-fade-in-up delay-300">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900">{t(lang, 'stockAlerts')}</h2>
             <Link to="/inventory" className="text-sm text-primary-600 hover:underline">{t(lang, 'viewAll')}</Link>
@@ -104,7 +104,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recent patients */}
-        <div className="card p-5 lg:col-span-3">
+        <div className="card card-hover p-5 lg:col-span-3 animate-fade-in-up">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900">{t(lang, 'recentPatients')}</h2>
             <Link to="/patients" className="text-sm text-primary-600 hover:underline">{t(lang, 'viewAll')}</Link>

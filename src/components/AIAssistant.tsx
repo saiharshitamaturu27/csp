@@ -163,7 +163,7 @@ export default function AIAssistant() {
       </button>
 
       {/* Chat panel */}
-      <div className={`fixed inset-0 sm:inset-auto sm:bottom-5 sm:right-5 z-50 ${open ? 'flex' : 'hidden'} flex-col bg-white sm:rounded-2xl shadow-2xl border border-gray-200 w-full sm:w-[420px] h-full sm:h-[600px] sm:max-h-[calc(100vh-2.5rem)] overflow-hidden`}>
+      <div className={`fixed inset-0 sm:inset-auto sm:bottom-5 sm:right-5 z-50 ${open ? 'flex' : 'hidden'} flex-col bg-white sm:rounded-2xl shadow-2xl border border-gray-200 w-full sm:w-[420px] h-full sm:h-[600px] sm:max-h-[calc(100vh-2.5rem)] overflow-hidden animate-slide-in-right`}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3.5 bg-gradient-to-r from-secondary-600 to-secondary-700 text-white shrink-0">
           <div className="flex items-center gap-2.5">
