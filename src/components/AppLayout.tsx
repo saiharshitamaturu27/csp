@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { t, LANGUAGES, type Lang } from '../lib/i18n';
+import AIAssistant from './AIAssistant';
 
 const navItems = [
   { to: '/', key: 'dashboard', icon: LayoutDashboard },
@@ -144,6 +145,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
+
+      {/* Floating AI Assistant */}
+      <AIAssistant />
     </div>
   );
 }

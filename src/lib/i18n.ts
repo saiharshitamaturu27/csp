@@ -176,6 +176,19 @@ const en: Dict = {
   schemeApplications: 'Scheme Applications',
   pendingApplications: 'Pending Applications',
   approvedApplications: 'Approved Applications',
+  aiAssistant: 'AI Assistant',
+  aiAssistantSub: 'Clinical decision support',
+  aiGreeting: "Hello! I'm your AI clinical assistant. I can help with symptom assessment, treatment guidance, drug dosing, and emergency triage. Describe the patient's symptoms or ask a clinical question.",
+  aiQuickPrompts: 'Try asking:',
+  aiInputPlaceholder: 'Describe symptoms or ask a clinical question...',
+  aiDisclaimer: 'AI suggestions are for decision support only. Always verify with clinical judgment.',
+  chat: 'Chat',
+  close: 'Close',
+  you: 'You',
+  waitingForPatient: 'Waiting for patient to join...',
+  noMessagesYet: 'No messages yet. Start the conversation.',
+  typeMessage: 'Type a message...',
+  aiInCallHint: 'Ask about symptoms, dosing, or emergency protocols during the consultation',
 };
 
 const hi: Dict = {
@@ -255,6 +268,18 @@ const hi: Dict = {
   saveSuccess: 'सफलतापूर्वक सहेजा गया',
   loading: 'लोड हो रहा है...',
   noData: 'कोई रिकॉर्ड नहीं मिला',
+  aiAssistant: 'एआई सहायक',
+  aiAssistantSub: 'नैदानिक निर्णय सहायता',
+  aiGreeting: "नमस्ते! मैं आपका एआई नैदानिक सहायक हूँ। मैं लक्षण मूल्यांकन, उपचार मार्गदर्शन, दवा खुराक और आपातकालीन ट्रिएज में मदद कर सकता हूँ। रोगी के लक्षण बताएं या नैदानिक प्रश्न पूछें।",
+  aiInputPlaceholder: 'लक्षण बताएं या नैदानिक प्रश्न पूछें...',
+  aiDisclaimer: 'एआई सुझाव केवल निर्णय सहायता के लिए हैं। हमेशा नैदानिक निर्णय से सत्यापित करें।',
+  chat: 'चैट',
+  close: 'बंद करें',
+  you: 'आप',
+  waitingForPatient: 'रोगी के आने की प्रतीक्षा में...',
+  noMessagesYet: 'अभी कोई संदेश नहीं। बातचीत शुरू करें।',
+  typeMessage: 'संदेश लिखें...',
+  aiInCallHint: 'परामर्श के दौरान लक्षण, खुराक, या आपातकालीन प्रोटोकॉल के बारे में पूछें',
 };
 
 const dicts: Record<Lang, Dict> = { en, hi, ta: en, te: en, kn: en, bn: en, mr: en, gu: en };

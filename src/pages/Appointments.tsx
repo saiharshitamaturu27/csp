@@ -6,6 +6,7 @@ import { supabase, type Appointment, type Patient } from '../lib/supabase';
 import { PageHeader, Modal, EmptyState, Badge } from '../components/ui';
 import { format, parseISO } from 'date-fns';
 import { Link } from 'react-router-dom';
+import VideoCallRoom from '../components/VideoCallRoom';
 
 export default function Appointments() {
   const { lang, user } = useAuth();
@@ -196,33 +197,9 @@ export default function Appointments() {
         </form>
       </Modal>
 
-      {/* Video call modal */}
+      {/* Video call room */}
       {videoCallAppt && (
-        <div className="fixed inset-0 z-50 bg-gray-900 flex flex-col">
-          <div className="flex items-center justify-between px-5 py-4 bg-gray-800">
-            <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-error-500 animate-pulse" />
-              <span className="text-white font-medium">{t(lang, 'videoConsultation')} — {videoCallAppt.patient?.full_name}</span>
-            </div>
-            <button onClick={() => setVideoCallAppt(null)} className="btn-danger"><Phone className="w-4 h-4" />{t(lang, 'endCall')}</button>
-          </div>
-          <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-            <div className="text-center">
-              <div className="w-32 h-32 rounded-full bg-primary-600/30 flex items-center justify-center mb-4 mx-auto">
-                <div className="w-24 h-24 rounded-full bg-primary-600 flex items-center justify-center text-3xl font-bold text-white">
-                  {videoCallAppt.patient?.full_name?.charAt(0).toUpperCase()}
-                </div>
-              </div>
-              <p className="text-white text-lg font-medium">{videoCallAppt.patient?.full_name}</p>
-              <p className="text-gray-400 text-sm">{format(parseISO(videoCallAppt.scheduled_at), 'd MMM, h:mm a')}</p>
-              <p className="text-gray-500 text-xs mt-3">Waiting for patient to join...</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-center gap-3 py-6 bg-gray-800">
-            <button className="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white flex items-center justify-center"><Video className="w-5 h-5" /></button>
-            <button className="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white flex items-center justify-center"><Phone className="w-5 h-5" /></button>
-          </div>
-        </div>
+        <VideoCallRoom appointment={videoCallAppt} onEnd={() => setVideoCallAppt(null)} />
       )}
     </div>
   );
