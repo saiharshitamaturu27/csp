@@ -9,18 +9,19 @@ import { useAuth } from '../lib/AuthContext';
 import { t, LANGUAGES, type Lang } from '../lib/i18n';
 import AIAssistant from './AIAssistant';
 
-const navItems = [
-  { to: '/', key: 'dashboard', icon: LayoutDashboard },
-  { to: '/patients', key: 'patients', icon: Users },
-  { to: '/appointments', key: 'appointments', icon: CalendarDays },
-  { to: '/consultations', key: 'consultations', icon: Stethoscope },
-  { to: '/maternal', key: 'maternal', icon: HeartPulse },
-  { to: '/vaccinations', key: 'vaccinations', icon: Syringe },
-  { to: '/inventory', key: 'inventory', icon: Pill },
-  { to: '/schemes', key: 'schemes', icon: Landmark },
-  { to: '/education', key: 'education', icon: BookOpen },
-  { to: '/reports', key: 'reports', icon: BarChart3 },
-  { to: '/feedback', key: 'feedback', icon: MessageSquare },
+const allNavItems = [
+  { to: '/', key: 'dashboard', icon: LayoutDashboard, roles: ['asha', 'doctor', 'admin'] },
+  { to: '/my-health', key: 'myHealth', icon: Activity, roles: ['patient'] },
+  { to: '/patients', key: 'patients', icon: Users, roles: ['asha', 'doctor', 'admin'] },
+  { to: '/appointments', key: 'appointments', icon: CalendarDays, roles: ['asha', 'doctor', 'admin', 'patient'] },
+  { to: '/consultations', key: 'consultations', icon: Stethoscope, roles: ['asha', 'doctor', 'admin', 'patient'] },
+  { to: '/maternal', key: 'maternal', icon: HeartPulse, roles: ['asha', 'doctor', 'admin', 'patient'] },
+  { to: '/vaccinations', key: 'vaccinations', icon: Syringe, roles: ['asha', 'doctor', 'admin', 'patient'] },
+  { to: '/inventory', key: 'inventory', icon: Pill, roles: ['asha', 'doctor', 'admin'] },
+  { to: '/schemes', key: 'schemes', icon: Landmark, roles: ['asha', 'doctor', 'admin', 'patient'] },
+  { to: '/education', key: 'education', icon: BookOpen, roles: ['asha', 'doctor', 'admin', 'patient'] },
+  { to: '/reports', key: 'reports', icon: BarChart3, roles: ['doctor', 'admin'] },
+  { to: '/feedback', key: 'feedback', icon: MessageSquare, roles: ['asha', 'doctor', 'admin', 'patient'] },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -36,6 +37,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const roleLabel = profile ? t(lang, profile.role) : '';
   const currentLang = LANGUAGES.find((l) => l.code === lang);
+  const navItems = allNavItems.filter((item) => profile && item.roles.includes(profile.role));
 
   return (
     <div className="min-h-screen bg-gray-50 flex">

@@ -7,12 +7,14 @@ import { PageHeader, Modal, EmptyState, Badge } from '../components/ui';
 import { format, parseISO, differenceInWeeks } from 'date-fns';
 
 export default function MaternalCare() {
-  const { lang } = useAuth();
+  const { lang, profile } = useAuth();
+  const isPatient = profile?.role === 'patient';
   const [records, setRecords] = useState<MaternalRecord[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [patientId, setPatientId] = useState<string | null>(null);
   const [form, setForm] = useState({
     patient_id: '', lmp: '', edd: '', gravida: '1', para: '0',
     trimester: '1', anc_visits: '0', risk_level: 'low', notes: '',
@@ -20,17 +22,20 @@ export default function MaternalCare() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('maternal_records')
-      .select('*, patient:patients(*)')
-      .order('created_at', { ascending: false });
+    let query = supabase.from('maternal_records').select('*, patient:patients(*)').order('created_at', { ascending: false });
+    if (isPatient && patientId) query = query.eq('patient_id', patientId);
+    const { data } = await query;
     setRecords((data || []) as MaternalRecord[]);
     setLoading(false);
-  }, []);
+  }, [isPatient, patientId]);
 
   useEffect(() => {
-    supabase.from('patients').select('*').eq('gender', 'female').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
-  }, []);
+    if (!isPatient) {
+      supabase.from('patients').select('*').eq('gender', 'female').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
+    } else if (profile) {
+      supabase.from('patients').select('id').eq('registered_by', profile.id).maybeSingle().then(({ data }) => setPatientId(data?.id || null));
+    }
+  }, [isPatient, profile]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -95,7 +100,7 @@ export default function MaternalCare() {
       <PageHeader
         title={t(lang, 'maternal')}
         subtitle="ANC / PNC tracking and risk assessment"
-        action={<button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'addNew')}</button>}
+        action={!isPatient ? <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'addNew')}</button> : undefined}
       />
 
       {/* Risk summary cards */}
@@ -142,8 +147,8 @@ export default function MaternalCare() {
                 </div>
                 {r.notes && <p className="text-sm text-gray-600 mt-3 pt-3 border-t border-gray-100">{r.notes}</p>}
                 <div className="flex gap-1 justify-end mt-3">
-                  <button onClick={() => openEdit(r)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><Edit2 className="w-4 h-4" /></button>
-                  <button onClick={() => handleDelete(r.id)} className="p-2 rounded-lg hover:bg-error-50 text-gray-500 hover:text-error-600"><Trash2 className="w-4 h-4" /></button>
+                  {!isPatient && <button onClick={() => openEdit(r)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><Edit2 className="w-4 h-4" /></button>}
+                  {!isPatient && <button onClick={() => handleDelete(r.id)} className="p-2 rounded-lg hover:bg-error-50 text-gray-500 hover:text-error-600"><Trash2 className="w-4 h-4" /></button>}
                 </div>
               </div>
             );

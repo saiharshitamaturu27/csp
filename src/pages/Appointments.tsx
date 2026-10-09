@@ -9,7 +9,8 @@ import { Link } from 'react-router-dom';
 import VideoCallRoom from '../components/VideoCallRoom';
 
 export default function Appointments() {
-  const { lang, user } = useAuth();
+  const { lang, user, profile } = useAuth();
+  const isPatient = profile?.role === 'patient';
   const [appts, setAppts] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,22 +18,28 @@ export default function Appointments() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [videoCallAppt, setVideoCallAppt] = useState<Appointment | null>(null);
+  const [patientId, setPatientId] = useState<string | null>(null);
   const [form, setForm] = useState({ patient_id: '', scheduled_at: '', type: 'in-person', reason: '', status: 'scheduled' });
+
+  useEffect(() => {
+    if (!isPatient) {
+      supabase.from('patients').select('*').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
+    } else if (profile) {
+      supabase.from('patients').select('id').eq('registered_by', profile.id).maybeSingle().then(({ data }) => setPatientId(data?.id || null));
+    }
+  }, [isPatient, profile]);
 
   const load = useCallback(async () => {
     setLoading(true);
     let query = supabase.from('appointments').select('*, patient:patients(*)').order('scheduled_at', { ascending: false });
     if (filter !== 'all') query = query.eq('status', filter);
+    if (isPatient && patientId) query = query.eq('patient_id', patientId);
     const { data } = await query.limit(100);
     setAppts((data || []) as Appointment[]);
     setLoading(false);
-  }, [filter]);
+  }, [filter, isPatient, patientId]);
 
-  useEffect(() => {
-    supabase.from('patients').select('*').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
-  }, []);
-
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (!isPatient || patientId !== undefined) load(); }, [load]);
 
   const openAdd = () => {
     setEditId(null);
@@ -87,7 +94,7 @@ export default function Appointments() {
     <div>
       <PageHeader
         title={t(lang, 'appointments')}
-        action={<button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'scheduleAppointment')}</button>}
+        action={!isPatient ? <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'scheduleAppointment')}</button> : undefined}
       />
 
       <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
@@ -139,11 +146,11 @@ export default function Appointments() {
                             <Video className="w-4 h-4" />
                           </button>
                         )}
-                        <Link to="/consultations" className="p-2 rounded-lg hover:bg-primary-50 text-primary-600" title={t(lang, 'newConsultation')}>
+                        {!isPatient && <Link to="/consultations" className="p-2 rounded-lg hover:bg-primary-50 text-primary-600" title={t(lang, 'newConsultation')}>
                           <Stethoscope className="w-4 h-4" />
-                        </Link>
-                        <button onClick={() => openEdit(a)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(a.id)} className="p-2 rounded-lg hover:bg-error-50 text-gray-500 hover:text-error-600"><Trash2 className="w-4 h-4" /></button>
+                        </Link>}
+                        {!isPatient && <button onClick={() => openEdit(a)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><Edit2 className="w-4 h-4" /></button>}
+                        {!isPatient && <button onClick={() => handleDelete(a.id)} className="p-2 rounded-lg hover:bg-error-50 text-gray-500 hover:text-error-600"><Trash2 className="w-4 h-4" /></button>}
                       </div>
                     </td>
                   </tr>

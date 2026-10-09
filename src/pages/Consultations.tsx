@@ -7,7 +7,8 @@ import { PageHeader, Modal, EmptyState } from '../components/ui';
 import { format, parseISO } from 'date-fns';
 
 export default function Consultations() {
-  const { lang, user } = useAuth();
+  const { lang, user, profile } = useAuth();
+  const isPatient = profile?.role === 'patient';
   const [consults, setConsults] = useState<Consultation[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +16,7 @@ export default function Consultations() {
   const [detailConsult, setDetailConsult] = useState<Consultation | null>(null);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
+  const [patientId, setPatientId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     patient_id: '', chief_complaint: '', diagnosis: '', notes: '',
@@ -24,18 +26,20 @@ export default function Consultations() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('consultations')
-      .select('*, patient:patients(*)')
-      .order('created_at', { ascending: false })
-      .limit(50);
+    let query = supabase.from('consultations').select('*, patient:patients(*)').order('created_at', { ascending: false }).limit(50);
+    if (isPatient && patientId) query = query.eq('patient_id', patientId);
+    const { data } = await query;
     setConsults((data || []) as Consultation[]);
     setLoading(false);
-  }, []);
+  }, [isPatient, patientId]);
 
   useEffect(() => {
-    supabase.from('patients').select('*').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
-  }, []);
+    if (!isPatient) {
+      supabase.from('patients').select('*').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
+    } else if (profile) {
+      supabase.from('patients').select('id').eq('registered_by', profile.id).maybeSingle().then(({ data }) => setPatientId(data?.id || null));
+    }
+  }, [isPatient, profile]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -138,7 +142,7 @@ export default function Consultations() {
     <div>
       <PageHeader
         title={t(lang, 'consultations')}
-        action={<button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'newConsultation')}</button>}
+        action={!isPatient ? <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'newConsultation')}</button> : undefined}
       />
 
       <div className="card overflow-hidden">

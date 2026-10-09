@@ -153,6 +153,7 @@ export default function AuthPage() {
                           <option value="asha">{t(lang, 'asha')}</option>
                           <option value="doctor">{t(lang, 'doctor')}</option>
                           <option value="admin">{t(lang, 'admin')}</option>
+                          <option value="patient">{t(lang, 'patient')}</option>
                         </select>
                       </div>
                     </div>

@@ -15,24 +15,32 @@ const COMMON_VACCINES = [
 ];
 
 export default function Vaccinations() {
-  const { lang, user } = useAuth();
+  const { lang, user, profile } = useAuth();
+  const isPatient = profile?.role === 'patient';
   const [records, setRecords] = useState<Vaccination[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [patientId, setPatientId] = useState<string | null>(null);
   const [form, setForm] = useState({ patient_id: '', vaccine_name: '', dose_number: '1', administered_date: format(new Date(), 'yyyy-MM-dd'), next_due: '', notes: '' });
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from('vaccinations').select('*, patient:patients(*)').order('administered_date', { ascending: false }).limit(100);
+    let query = supabase.from('vaccinations').select('*, patient:patients(*)').order('administered_date', { ascending: false }).limit(100);
+    if (isPatient && patientId) query = query.eq('patient_id', patientId);
+    const { data } = await query;
     setRecords((data || []) as Vaccination[]);
     setLoading(false);
-  }, []);
+  }, [isPatient, patientId]);
 
   useEffect(() => {
-    supabase.from('patients').select('*').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
-  }, []);
+    if (!isPatient) {
+      supabase.from('patients').select('*').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
+    } else if (profile) {
+      supabase.from('patients').select('id').eq('registered_by', profile.id).maybeSingle().then(({ data }) => setPatientId(data?.id || null));
+    }
+  }, [isPatient, profile]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -88,7 +96,7 @@ export default function Vaccinations() {
       <PageHeader
         title={t(lang, 'vaccinations')}
         subtitle={`${dueSoon.length} due in next 30 days`}
-        action={<button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'addNew')}</button>}
+        action={!isPatient ? <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'addNew')}</button> : undefined}
       />
 
       <div className="card overflow-hidden">
@@ -132,8 +140,8 @@ export default function Vaccinations() {
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => openEdit(v)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><Edit2 className="w-4 h-4" /></button>
-                          <button onClick={() => handleDelete(v.id)} className="p-2 rounded-lg hover:bg-error-50 text-gray-500 hover:text-error-600"><Trash2 className="w-4 h-4" /></button>
+                          {!isPatient && <button onClick={() => openEdit(v)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><Edit2 className="w-4 h-4" /></button>}
+                          {!isPatient && <button onClick={() => handleDelete(v.id)} className="p-2 rounded-lg hover:bg-error-50 text-gray-500 hover:text-error-600"><Trash2 className="w-4 h-4" /></button>}
                         </div>
                       </td>
                     </tr>

@@ -3,6 +3,7 @@ import { useAuth } from './lib/AuthContext';
 import AuthPage from './pages/AuthPage';
 import AppLayout from './components/AppLayout';
 import Dashboard from './pages/Dashboard';
+import PatientDashboard from './pages/PatientDashboard';
 import Patients from './pages/Patients';
 import Appointments from './pages/Appointments';
 import Consultations from './pages/Consultations';
@@ -14,20 +15,32 @@ import HealthEducation from './pages/HealthEducation';
 import Reports from './pages/Reports';
 import FeedbackPage from './pages/FeedbackPage';
 
+const WORKER_ROLES = ['asha', 'doctor', 'admin'];
+
+function RoleRoute({ roles, children }: { roles: string[]; children: React.ReactNode }) {
+  const { profile } = useAuth();
+  if (profile && !roles.includes(profile.role)) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
 function ProtectedRoutes() {
+  const { profile } = useAuth();
+  const isPatient = profile?.role === 'patient';
+
   return (
     <AppLayout>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/patients" element={<Patients />} />
+        <Route path="/" element={isPatient ? <PatientDashboard /> : <Dashboard />} />
+        <Route path="/my-health" element={isPatient ? <PatientDashboard /> : <Navigate to="/" replace />} />
+        <Route path="/patients" element={<RoleRoute roles={WORKER_ROLES}><Patients /></RoleRoute>} />
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/consultations" element={<Consultations />} />
         <Route path="/maternal" element={<MaternalCare />} />
         <Route path="/vaccinations" element={<Vaccinations />} />
-        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/inventory" element={<RoleRoute roles={WORKER_ROLES}><Inventory /></RoleRoute>} />
         <Route path="/schemes" element={<Schemes />} />
         <Route path="/education" element={<HealthEducation />} />
-        <Route path="/reports" element={<Reports />} />
+        <Route path="/reports" element={<RoleRoute roles={['doctor', 'admin']}><Reports /></RoleRoute>} />
         <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

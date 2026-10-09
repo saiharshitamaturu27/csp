@@ -7,7 +7,8 @@ import { PageHeader, Modal, EmptyState, Badge } from '../components/ui';
 import { format, parseISO } from 'date-fns';
 
 export default function Schemes() {
-  const { lang, user } = useAuth();
+  const { lang, user, profile } = useAuth();
+  const isPatient = profile?.role === 'patient';
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [applications, setApplications] = useState<SchemeApplication[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -16,22 +17,33 @@ export default function Schemes() {
   const [modalOpen, setModalOpen] = useState(false);
   const [eligibilityModal, setEligibilityModal] = useState<Scheme | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+  const [patientId, setPatientId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', description: '', eligibility_criteria: '', benefits: '', category: '', min_age: '', max_age: '', income_limit: '', for_pregnant: false, for_child: false });
 
   const load = useCallback(async () => {
     setLoading(true);
     const [s, a] = await Promise.all([
       supabase.from('schemes').select('*').order('name'),
-      supabase.from('scheme_applications').select('*, patient:patients(*), scheme:schemes(*)').order('created_at', { ascending: false }),
+      isPatient && patientId
+        ? supabase.from('scheme_applications').select('*, patient:patients(*), scheme:schemes(*)').eq('patient_id', patientId).order('created_at', { ascending: false })
+        : supabase.from('scheme_applications').select('*, patient:patients(*), scheme:schemes(*)').order('created_at', { ascending: false }),
     ]);
     setSchemes((s.data || []) as Scheme[]);
     setApplications((a.data || []) as SchemeApplication[]);
     setLoading(false);
-  }, []);
+  }, [isPatient, patientId]);
 
   useEffect(() => {
-    supabase.from('patients').select('*').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
-  }, []);
+    if (!isPatient) {
+      supabase.from('patients').select('*').order('full_name').then(({ data }) => setPatients((data || []) as Patient[]));
+    } else if (profile) {
+      supabase.from('patients').select('*').eq('registered_by', profile.id).maybeSingle().then(({ data }) => {
+        const p = data as Patient | null;
+        setPatientId(p?.id || null);
+        if (p) setPatients([p]);
+      });
+    }
+  }, [isPatient, profile]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -89,7 +101,7 @@ export default function Schemes() {
       <PageHeader
         title={t(lang, 'schemes')}
         subtitle="Government health welfare scheme eligibility"
-        action={tab === 'schemes' ? <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'addNew')}</button> : undefined}
+        action={tab === 'schemes' && !isPatient ? <button onClick={openAdd} className="btn-primary"><Plus className="w-4 h-4" />{t(lang, 'addNew')}</button> : undefined}
       />
 
       <div className="flex gap-2 mb-5">
@@ -112,14 +124,14 @@ export default function Schemes() {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => openEdit(s)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><Edit2 className="w-4 h-4" /></button>
-                  <button onClick={() => handleDelete(s.id)} className="p-2 rounded-lg hover:bg-error-50 text-gray-500 hover:text-error-600"><Trash2 className="w-4 h-4" /></button>
+                  {!isPatient && <button onClick={() => openEdit(s)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><Edit2 className="w-4 h-4" /></button>}
+                  {!isPatient && <button onClick={() => handleDelete(s.id)} className="p-2 rounded-lg hover:bg-error-50 text-gray-500 hover:text-error-600"><Trash2 className="w-4 h-4" /></button>}
                 </div>
               </div>
               <p className="text-sm text-gray-600 mb-2">{s.description}</p>
               {s.benefits && <p className="text-sm text-gray-700 mb-2"><span className="font-medium">{t(lang, 'benefits')}:</span> {s.benefits}</p>}
               {s.eligibility_criteria && <p className="text-xs text-gray-500 mb-3"><span className="font-medium">{t(lang, 'eligibilityCriteria')}:</span> {s.eligibility_criteria}</p>}
-              <button onClick={() => setEligibilityModal(s)} className="btn-secondary w-full text-sm">{t(lang, 'checkEligibility')}</button>
+              <button onClick={() => setEligibilityModal(s)} className="btn-secondary w-full text-sm">{isPatient ? t(lang, 'applyScheme') : t(lang, 'checkEligibility')}</button>
             </div>
           ))}
         </div>
@@ -146,7 +158,7 @@ export default function Schemes() {
                       <td className="px-5 py-3"><Badge status={a.status}>{t(lang, a.status)}</Badge></td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          {a.status === 'pending' || a.status === 'eligible' ? (
+                          {!isPatient && (a.status === 'pending' || a.status === 'eligible') ? (
                             <>
                               <button onClick={() => updateAppStatus(a.id, 'approved')} className="p-2 rounded-lg hover:bg-success-50 text-success-600" title="Approve"><CheckCircle2 className="w-4 h-4" /></button>
                               <button onClick={() => updateAppStatus(a.id, 'rejected')} className="p-2 rounded-lg hover:bg-error-50 text-error-600" title="Reject"><XCircle className="w-4 h-4" /></button>
@@ -194,9 +206,14 @@ export default function Schemes() {
 }
 
 function EligibilityChecker({ scheme, patients, onApply }: { scheme: Scheme; patients: Patient[]; onApply: (schemeId: string, patientId: string, status: string) => void }) {
-  const { lang } = useAuth();
+  const { lang, profile } = useAuth();
+  const isPatient = profile?.role === 'patient';
   const [selectedPatient, setSelectedPatient] = useState<string>('');
   const [result, setResult] = useState<{ eligible: boolean; reasons: string[] } | null>(null);
+
+  useEffect(() => {
+    if (isPatient && patients.length > 0) setSelectedPatient(patients[0].id);
+  }, [isPatient, patients]);
 
   const patient = patients.find((p) => p.id === selectedPatient);
 
@@ -224,12 +241,16 @@ function EligibilityChecker({ scheme, patients, onApply }: { scheme: Scheme; pat
       </div>
       <div>
         <label className="label">{t(lang, 'selectPatient')}</label>
+        {isPatient ? (
+          <p className="text-sm text-gray-700 bg-gray-50 rounded-lg px-3.5 py-2.5 border border-gray-200">{patients[0]?.full_name || 'You'}</p>
+        ) : (
         <select className="input" value={selectedPatient} onChange={(e) => { setSelectedPatient(e.target.value); setResult(null); }}>
           <option value="">-- Select --</option>
           {patients.map((p) => <option key={p.id} value={p.id}>{p.full_name} (Age: {p.age || '?'}, {p.gender})</option>)}
         </select>
+        )}
       </div>
-      <button onClick={handleCheck} disabled={!selectedPatient} className="btn-primary w-full">{t(lang, 'checkEligibility')}</button>
+      <button onClick={handleCheck} disabled={!selectedPatient && !isPatient} className="btn-primary w-full">{isPatient ? t(lang, 'applyScheme') : t(lang, 'checkEligibility')}</button>
 
       {result && (
         <div className={`rounded-lg p-4 border ${result.eligible ? 'bg-success-50 border-success-200' : 'bg-error-50 border-error-200'}`}>

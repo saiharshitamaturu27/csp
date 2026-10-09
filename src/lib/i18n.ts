@@ -189,6 +189,19 @@ const en: Dict = {
   noMessagesYet: 'No messages yet. Start the conversation.',
   typeMessage: 'Type a message...',
   aiInCallHint: 'Ask about symptoms, dosing, or emergency protocols during the consultation',
+  patient: 'Patient',
+  myAppointments: 'My Appointments',
+  myConsultations: 'My Consultations',
+  myVaccinations: 'My Vaccinations',
+  myMaternalRecords: 'My Maternal Records',
+  mySchemes: 'My Schemes',
+  applyScheme: 'Apply for Scheme',
+  myHealth: 'My Health',
+  upcomingVisits: 'Upcoming Visits',
+  healthSummary: 'Health Summary',
+  noAppointments: 'No appointments scheduled',
+  noConsultations: 'No consultation records found',
+  noVaccinations: 'No vaccination records found',
 };
 
 const hi: Dict = {
@@ -280,6 +293,19 @@ const hi: Dict = {
   noMessagesYet: 'अभी कोई संदेश नहीं। बातचीत शुरू करें।',
   typeMessage: 'संदेश लिखें...',
   aiInCallHint: 'परामर्श के दौरान लक्षण, खुराक, या आपातकालीन प्रोटोकॉल के बारे में पूछें',
+  patient: 'मरीज़',
+  myAppointments: 'मेरे अपॉइंटमेंट',
+  myConsultations: 'मेरे परामर्श',
+  myVaccinations: 'मेरे टीकाकरण',
+  myMaternalRecords: 'मेरी मातृ रिकॉर्ड',
+  mySchemes: 'मेरी योजनाएँ',
+  applyScheme: 'योजना के लिए आवेदन करें',
+  myHealth: 'मेरा स्वास्थ्य',
+  upcomingVisits: 'आगामी विज़िट',
+  healthSummary: 'स्वास्थ्य सारांश',
+  noAppointments: 'कोई अपॉइंटमेंट निर्धारित नहीं है',
+  noConsultations: 'कोई परामर्श रिकॉर्ड नहीं मिला',
+  noVaccinations: 'कोई टीकाकरण रिकॉर्ड नहीं मिला',
 };
 
 const dicts: Record<Lang, Dict> = { en, hi, ta: en, te: en, kn: en, bn: en, mr: en, gu: en };

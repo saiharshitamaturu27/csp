@@ -18,7 +18,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export type Profile = {
   id: string;
   full_name: string;
-  role: 'asha' | 'doctor' | 'admin';
+  role: 'asha' | 'doctor' | 'admin' | 'patient';
   phone?: string | null;
   facility?: string | null;
   language: string;
