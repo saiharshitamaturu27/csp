@@ -6,6 +6,7 @@ import { supabase, type Appointment, type Consultation, type Vaccination, type M
 import { PageHeader, StatCard, Badge, EmptyState } from '../components/ui';
 import { format, parseISO, isToday, isFuture } from 'date-fns';
 import { Link } from 'react-router-dom';
+import VoiceAssistant from '../components/VoiceAssistant';
 
 export default function PatientDashboard() {
   const { lang, profile } = useAuth();
@@ -213,6 +214,8 @@ export default function PatientDashboard() {
           </div>
         </div>
       )}
+
+      <VoiceAssistant />
     </div>
   );
 }
